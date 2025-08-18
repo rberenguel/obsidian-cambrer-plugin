@@ -1,61 +1,45 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-    <title>{{title}}</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/metap.css">
-    <style>
-        /* Basic Fallbacks */
-        body.theme-light {
-            --background-primary: #fff; --text-normal: #222; --text-accent: #0066cc;
-            --text-accent-hover: #0088ff; --background-secondary-alt: #eee;
-            --background-modifier-border: #ddd; --text-error: #cc2222;
-        }
-        body.theme-dark {
-            --background-primary: #222; --text-normal: #ddd; --text-accent: #3af;
-            --text-accent-hover: #5cf; --background-secondary-alt: #333;
-            --background-modifier-border: #444; --text-error: #ff5555;
-        }
+	<head>
+		<title>{{title}}</title>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="stylesheet" href="/metap.css" />
+		<style>
+			/* All styles from the Obsidian app are injected here */
+			{{styles}}
 
-        /* Injected theme variables will override the above */
-        {{cssVars}}
-
-        body { 
-            max-width: 800px; 
-            margin: auto; 
-            padding: 2em; 
-            background-color: var(--background-primary); 
-            color: var(--text-normal);
-            font-family: var(--font-interface, sans-serif);
-        }
-        img, video { max-width: 100%; height: auto; }
-        .is-unresolved { color: var(--text-error); text-decoration: line-through; }
-        a { color: var(--text-accent); }
-        a:hover { color: var(--text-accent-hover); }
-    </style>
-</head>
-<body class="{{themeClass}}">
-    <h1>{{title}}</h1>
-    {{body}}
-    <script src="/metap.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            const response = await fetch('/search-data.json');
-            const notes = await response.json();
-            const commands = notes.map(note => ({
-                title: note.path,
-                lambda: () => {
-                    window.location.href = `/${encodeURI(note.path)}`;
-                }
-            }));
-            if (window.metaP) {
-               // Set properties on the existing instance before binding
-               window.metaP.maxCommands = 10;
-               window.metaP.maxCommandTitleLength = 100;
-               window.metaP.bind(commands);
-            }
-        });
-    </script>
-</body>
+			/* Overrides for the served page context */
+			body {
+			    max-width: 50vw;
+			    margin: auto;
+			    padding: 2em;
+			}
+			img, video { max-width: 100%; height: auto; }
+			.is-unresolved { color: var(--text-error, #cc2222); text-decoration: line-through; }
+		</style>
+	</head>
+	<body class="{{themeClass}}">
+		<h1>{{title}}</h1>
+		{{body}}
+		<script src="/metap.js"></script>
+		<script>
+			document.addEventListener("DOMContentLoaded", async () => {
+				const response = await fetch("/search-data.json");
+				const notes = await response.json();
+				const commands = notes.map((note) => ({
+					title: note.path,
+					lambda: () => {
+						window.location.href = `/${encodeURI(note.path)}`;
+					},
+				}));
+				if (window.metaP) {
+					// Set properties on the existing instance before binding
+					window.metaP.maxCommands = 10;
+					window.metaP.maxCommandTitleLength = 100;
+					window.metaP.bind(commands);
+				}
+			});
+		</script>
+	</body>
 </html>

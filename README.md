@@ -6,14 +6,14 @@ Cambrer is an Obsidian plugin that runs a local web server to "serve" your notes
 
 ## Features
 
-* **Local Server**: Starts a simple, local HTTP server to serve your notes.
-* **Live Theming**: Automatically detects your current Obsidian theme (light or dark) and injects the corresponding styles into the served pages.
-* **Internal Link Navigation**: Click on internal `[[links]]` in the browser to navigate between your notes.
-* **Attachment Support**: Images, videos, and other attachments embedded in your notes are correctly displayed.
-* **Command Palette Search**: Press `Meta+P` (or `Ctrl+P`) in the browser to open a command palette (`metaP`) that lets you search for and jump to any note in your vault.
-* **"Open in Obsidian" Link**: Each served page includes a link to instantly open the note back in the Obsidian app.
-* **Configurable Port**: Set your preferred port for the server in the plugin settings.
-* **Plugin API**: Exposes functions for other plugins to programmatically serve one or more notes.
+- **Local Server**: Starts a simple, local HTTP server to serve your notes.
+- **Live Theming**: Automatically detects your current Obsidian theme (light or dark) and injects the corresponding styles into the served pages.
+- **Internal Link Navigation**: Click on internal `[[links]]` in the browser to navigate between your notes.
+- **Attachment Support**: Images, videos, and other attachments embedded in your notes are correctly displayed.
+- **Command Palette Search**: Press `Meta+P` (or `Ctrl+P`) in the browser to open a command palette (`metaP`) that lets you search for and jump to any note in your vault.
+- **"Open in Obsidian" Link**: Each served page includes a link to instantly open the note back in the Obsidian app.
+- **Configurable Port**: Set your preferred port for the server in the plugin settings.
+- **Plugin API**: Exposes functions for other plugins to programmatically serve one or more notes.
 
 ## How to Use
 
@@ -28,14 +28,14 @@ You can call Cambrer from other plugins to serve one or more files.
 
 ```javascript
 // Get the instance of the server plugin
-const serverPlugin = this.app.plugins.plugins['cambrer'];
+const serverPlugin = this.app.plugins.plugins["cambrer"];
 
 // Check if the plugin is enabled and the API method exists
 if (serverPlugin && serverPlugin.serveMultipleFiles) {
-    // 'selectedFiles' would be your array of TFile objects from the search results
-    serverPlugin.serveMultipleFiles(selectedFiles);
+	// 'selectedFiles' would be your array of TFile objects from the search results
+	serverPlugin.serveMultipleFiles(selectedFiles);
 } else {
-    new Notice('The Cambrer server plugin is not available.');
+	new Notice("The Cambrer server plugin is not available.");
 }
 ```
 
