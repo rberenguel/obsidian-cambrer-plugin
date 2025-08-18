@@ -26,6 +26,7 @@ const MIME_TYPES: Record<string, string> = {
     '.mp4': 'video/mp4',
     '.webm': 'video/webm',
     '.woff2': 'font/woff2',
+    '.css': 'text/css', // FIX: Added CSS MIME type
 };
 
 export default class LocalServerPlugin extends Plugin {
@@ -65,7 +66,6 @@ export default class LocalServerPlugin extends Plugin {
             },
         });
 
-        // Add the settings tab
         this.addSettingTab(new LocalServerSettingTab(this.app, this));
 
         console.log('Local Server Plugin loaded.');
@@ -144,16 +144,42 @@ export default class LocalServerPlugin extends Plugin {
         window.open(fileUrl);
     }
     
-    getThemeStyles(): { themeClass: string; cssVars: string } {
+    /**
+     * Extracts theme variables and all enabled plugin stylesheets.
+     */
+    getCombinedStyles(): { themeClass: string; cssVars: string; pluginCss: string } {
         const theme = document.body.classList.contains('theme-dark') ? 'theme-dark' : 'theme-light';
         const computedStyles = getComputedStyle(document.body);
         
+        // 1. Get Theme Variables
         const cssVars = Array.from(computedStyles)
             .filter(prop => prop.startsWith('--'))
             .map(prop => `${prop}: ${computedStyles.getPropertyValue(prop)};`)
             .join('\n');
             
-        return { themeClass: theme, cssVars: `body.${theme} {\n${cssVars}\n}` };
+        // 2. Get All Enabled Plugin CSS
+        let pluginCss = '';
+        if (this.app.vault.adapter instanceof FileSystemAdapter) {
+            const pluginsPath = this.app.vault.adapter.getFullPath(this.app.vault.configDir + '/plugins');
+            const enabledPlugins = (this.app as any).plugins.enabledPlugins;
+
+            for (const pluginId of enabledPlugins) {
+                const cssPath = path.join(pluginsPath, pluginId, 'styles.css');
+                try {
+                    if (fs.existsSync(cssPath)) {
+                        pluginCss += fs.readFileSync(cssPath, 'utf8') + '\n';
+                    }
+                } catch (e) {
+                    console.warn(`Could not read styles for plugin ${pluginId}:`, e);
+                }
+            }
+        }
+        
+        return { 
+            themeClass: theme, 
+            cssVars: `body.${theme} {\n${cssVars}\n}`,
+            pluginCss: pluginCss
+        };
     }
 
 
@@ -244,12 +270,13 @@ export default class LocalServerPlugin extends Plugin {
                     await MarkdownRenderer.render(this.app, markdown, container, file.path, this);
                     
                     const processedHtmlBody = this.postProcessHtml(file.path, container.innerHTML);
-                    const { themeClass, cssVars } = this.getThemeStyles();
+                    const { themeClass, cssVars, pluginCss } = this.getCombinedStyles();
 
                     const html = this.htmlTemplate
                         .replace(/{{title}}/g, file.basename)
                         .replace('{{themeClass}}', themeClass)
                         .replace('{{cssVars}}', cssVars)
+                        .replace('{{pluginCss}}', pluginCss) // Added plugin CSS replacement
                         .replace('{{body}}', processedHtmlBody);
 
                     res.writeHead(200, { 'Content-Type': 'text/html' });
@@ -283,7 +310,6 @@ export default class LocalServerPlugin extends Plugin {
     }
 }
 
-// Settings Tab
 class LocalServerSettingTab extends PluginSettingTab {
     plugin: LocalServerPlugin;
 
@@ -309,7 +335,6 @@ class LocalServerSettingTab extends PluginSettingTab {
                         if (port !== this.plugin.settings.port) {
                             this.plugin.settings.port = port;
                             await this.plugin.saveSettings();
-                            // If server is running, stop it to apply changes on next run.
                             if (this.plugin.server) {
                                 this.plugin.server.close();
                                 this.plugin.server = null;
