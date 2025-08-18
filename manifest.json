@@ -1,0 +1,10 @@
+{
+	"id": "Cambrer",
+	"name": "cambrer",
+	"version": "0.0.1",
+	"minAppVersion": "0.15.0",
+	"description": "Serve Obsidian to Chrome.",
+	"author": "Ruben Berenguel",
+	"authorUrl": "https://www.mostlymaths.net",
+	"isDesktopOnly": true
+}
